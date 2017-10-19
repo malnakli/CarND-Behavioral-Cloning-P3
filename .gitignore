@@ -2,3 +2,4 @@
 data/IMG
 data/*.csv
 .vscode
+*.pyc
