@@ -1,2 +1,4 @@
-data
-
+*.Ds_Store
+data/IMG
+data/*.csv
+.vscode
