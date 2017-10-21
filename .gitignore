@@ -3,3 +3,4 @@ data/IMG
 data/*.csv
 .vscode
 *.pyc
+graph_logs/*
