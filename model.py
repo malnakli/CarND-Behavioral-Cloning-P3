@@ -5,34 +5,55 @@ from network_models import Basic, LeNet, NVIDIA
 from keras.callbacks import TensorBoard
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
+import os
 
 # NOTE: I am using keras 2.0.8
+
+# ===================================================================== #
+# ========================  Combine Data ======================== #
+# ===================================================================== #
+
+# NOTE: The reason I am using pandas for even thought is not necessrary,
+# I would like to improve my skill on pandas.
+
+def get_dir_names():
+    folders = [] 
+    root_dir, dirs, files = next(os.walk('./data'))
+    for name in dirs:
+        folders.append(os.path.join(root_dir, name))
+    return  folders
+
+# create_all the driving logs into new one
+# @return path of driving log file
+def combine_data(folders):
+    list_   = []
+    headers = ['center_image', 'left_image', 'right_image',
+               'steering', 'throttle', 'break', 'speed']
+    for folder in folders:
+        df = pd.read_csv(folder + "/driving_log.csv",header=None,names=headers)
+        # get the relative path of the images
+        def get_image_path(row):
+            for image in headers[:3]:
+                row[image] = folder + '/' + '/'.join(row[image].split('/')[-2:])
+
+            return row
+
+        df = df.apply(get_image_path, axis=1)
+        list_.append(df)
+    
+    driving_log_file = "./data/combine_driving_log.csv"
+    pd.concat(list_).to_csv(driving_log_file,index=False)
+   
+    return driving_log_file
 
 # ===================================================================== #
 # ========================  split Data ======================== #
 # ===================================================================== #
 
 # @return pandas DataFrame
-def split_data():
-    # NOTE: The reason I am using pandas for even thought is not necessrary,
-    # I would like to improve my skill on pandas.
-
+def split_data(path_to_csv):
     # read  driveing log csv file
-    headers = ['center_image', 'left_image', 'right_image',
-               'steering', 'throttle', 'break', 'speed']
-    data = pd.read_csv("./data/driving_log.csv",
-                              header=None, names=headers)
-
-     # get the relative path of the images
-    def get_image_path(row):
-        for image in headers[:3]:
-            row[image] = './' + '/'.join(row[image].split('/')[-3:])
-
-        return row
-
-    data = data.apply(get_image_path, axis=1)
-
-
+    data = pd.read_csv(path_to_csv)
     return train_test_split(data, test_size=0.2)
 
 # ===================================================================== #
@@ -51,9 +72,9 @@ def load_data(samples):
             steerings.append(steering + correction)
 
             # For helping with the left turn bias involves flipping images and taking the opposite sign of the steering measurement.
-            image_flipped = np.fliplr(image)
-            images.append(image_flipped)
-            steerings.append(-(steering + correction))
+            # image_flipped = np.fliplr(image)
+            # images.append(image_flipped)
+            # steerings.append(-(steering + correction))
 
     # convert to numpy array since this what keras required
     return shuffle( np.array(images), np.array(steerings))
@@ -115,17 +136,21 @@ def run_model(fit_kwargs,netModel='Basic' ):
 # ===================================================================== #
 # ======================== Execute code ======================== #
 # ===================================================================== #
+def main():
+    train , valid = split_data(combine_data(get_dir_names()))
+    batch_size = 32
+    model_fit_generator_arguments = {
+        'generator':load_data_generator(train,batch_size),
+        'steps_per_epoch':int(train.shape[0]/batch_size), 
+        # I would like to use TensorBorad histograms, 
+        # look at this issue https://github.com/fchollet/keras/issues/3358
+        'validation_data':load_data(valid),
+    # 'validation_steps':int(valid.shape[0]/batch_size), # Only relevant if validation_data is a generator 
+    'verbose':1,
+    'epochs':1
+    }
+    run_model(model_fit_generator_arguments, netModel='Basic')
 
-train , valid = split_data()
-batch_size = 32
-model_fit_generator_arguments = {
-    'generator':load_data_generator(train,batch_size),
-    'steps_per_epoch':int(train.shape[0]/batch_size), 
-    # I would like to use TensorBorad histograms, 
-    # look at this issue https://github.com/fchollet/keras/issues/3358
-    'validation_data':load_data(valid),
-   # 'validation_steps':int(valid.shape[0]/batch_size), # Only relevant if validation_data is a generator 
-   'verbose':1,
-   'epochs':2
-}
-run_model(model_fit_generator_arguments, netModel='Basic')
+if __name__ == "__main__":
+    main()
+
