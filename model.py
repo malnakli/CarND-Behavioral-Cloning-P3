@@ -1,13 +1,13 @@
 import pandas as pd
 import cv2
 import numpy as np
-from network_models import Basic, LeNet, NVIDIA
+from network_models import Basic, LeNet, NVIDIA, keras_applications
 from keras.callbacks import TensorBoard
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 import os
 
-# NOTE: I am using keras 2.0.8
+# NOTE: I am using keras 2.0.8 with tensorflow 1.1.0
 
 # ===================================================================== #
 # ========================  Combine Data ======================== #
@@ -17,15 +17,24 @@ import os
 # I would like to improve my skill on pandas.
 
 def get_dir_names():
+    """Obtain directory names where data are saved.
+    Returns:
+       List of folders names
+    """
     folders = [] 
     root_dir, dirs, files = next(os.walk('./data'))
     for name in dirs:
         folders.append(os.path.join(root_dir, name))
     return  folders
 
-# create_all the driving logs into new one
-# @return path of driving log file
 def combine_data(folders):
+
+    """combine all driving logs files into one.
+    Arguments:
+        folders: List of folders names
+    Returns:
+       Path of the new driving log file.
+    """
     list_   = []
     headers = ['center_image', 'left_image', 'right_image',
                'steering', 'throttle', 'break', 'speed']
@@ -101,7 +110,8 @@ def run_model(fit_kwargs,netModel='Basic' ):
     models = {
         'Basic': Basic.model(),
         'LeNet': LeNet.model(),
-        'NVIDIA': NVIDIA.model()
+        'NVIDIA': NVIDIA.model(),
+        'inception': keras_applications.inception()
     }
     model = models[netModel]
     # TODO what are the differences among loss function and optimizer as well?
@@ -123,7 +133,7 @@ def run_model(fit_kwargs,netModel='Basic' ):
     # embeddings_freq: frequency (in epochs) at which selected embedding layers will be saved.
     # embeddings_layer_names: a list of names of layers to keep eye on. If None or empty list all the embedding layer will be watched.
 
-    tbCallback = TensorBoard(log_dir="./graph_logs", histogram_freq=1, 
+    tbCallback = TensorBoard(log_dir="./graph_logs", histogram_freq=0, 
     write_graph=True, write_images=True)
 
     # # https://github.com/fchollet/keras/pull/8023 bug in shuffle argument in keras 2.0.8
@@ -144,12 +154,12 @@ def main():
         'steps_per_epoch':int(train.shape[0]/batch_size), 
         # I would like to use TensorBorad histograms, 
         # look at this issue https://github.com/fchollet/keras/issues/3358
-        'validation_data':load_data(valid),
-    # 'validation_steps':int(valid.shape[0]/batch_size), # Only relevant if validation_data is a generator 
+        'validation_data':load_data_generator(valid),
+        'validation_steps':int(valid.shape[0]/batch_size), # Only relevant if validation_data is a generator 
     'verbose':1,
     'epochs':1
     }
-    run_model(model_fit_generator_arguments, netModel='Basic')
+    run_model(model_fit_generator_arguments, netModel='inception')
 
 if __name__ == "__main__":
     main()
