@@ -121,7 +121,8 @@ def run_model(fit_kwargs, netModel='Basic'):
         'Basic': Basic.model(),
         'LeNet': LeNet.model(),
         'NVIDIA': NVIDIA.model(),
-        'inception': keras_applications.inception()
+        'inception': keras_applications.inception(),
+        'vgg16': keras_applications.vgg(16)
     }
     model = models[netModel]
     # TODO what are the differences among loss function and optimizer as well?
