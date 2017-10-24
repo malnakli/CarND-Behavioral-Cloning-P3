@@ -2,7 +2,6 @@ import pandas as pd
 import cv2
 import numpy as np
 import tensorflow as tf
-from network_models import Basic, LeNet, NVIDIA, keras_applications
 from keras.callbacks import TensorBoard
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
@@ -117,16 +116,11 @@ def load_data_generator(samples, batch_size=32):
 
 def run_model(fit_kwargs, netModel='Basic'):
     # look at network model for more details for inside the model architecture
-
-    models = {
-        'Basic': Basic.model(),
-        'LeNet': LeNet.model(),
-        'NVIDIA': NVIDIA.model(),
-        'inception': keras_applications.inception(),
-        'vgg16': keras_applications.vgg(16),
-        'vgg19': keras_applications.vgg(19)
-    }
-    model = models[netModel]
+    # dynamically import modules 
+    import_package = "network_models." + netModel 
+    import_model = __import__(import_package, globals(), locals(), ['model'], 0)
+    model = import_model.model()
+    
     # TODO what are the differences among loss function and optimizer as well?
     # http://ruder.io/optimizing-gradient-descent/
 
