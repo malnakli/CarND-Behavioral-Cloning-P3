@@ -38,7 +38,7 @@ def combine_data(folders):
        Path of the new driving log file.
     """
     list_ = []
-    headers = ['center_image', 'left_image', 'right_image',
+    headers = ['center', 'left', 'right',
                'steering', 'throttle', 'break', 'speed']
     for folder in folders:
         df = pd.read_csv(folder + "/driving_log.csv",
@@ -82,16 +82,17 @@ def load_data(samples):
     steerings = []
     for index, row in samples.iterrows():
         # create adjusted steering measurements for the side camera images
-        corrections = [0, 0.1, -0.1]
-        for header, correction in zip(samples.columns[:1], corrections[:1]):
+        corrections = [0, 0.2, -0.2]
+        for header, correction in zip(samples.columns[:FLAGS.img_use], corrections[:FLAGS.img_use]):
             image = cv2.imread(row[header])
             steering = float(row['steering'])
             images.append(image)
             steerings.append(steering + correction)
-            # For helping with the left turn bias involves flipping images and taking the opposite sign of the steering measurement.
-            image_flipped = cv2.flip(image, 1)
-            images.append(image_flipped)
-            steerings.append(-(steering + correction))
+            if FLAGS.flip_img:
+                # For helping with the left turn bias involves flipping images and taking the opposite sign of the steering measurement.
+                image_flipped = cv2.flip(image, 1)
+                images.append(image_flipped)
+                steerings.append(-(steering + correction))
 
     # convert to numpy array since this what keras required
 
@@ -160,7 +161,7 @@ def run_model(fit_kwargs, netModel='Basic'):
 # ===================================================================== #
 def main():
     train, valid = split_data(combine_data(get_dir_names()))
-    batch_size = int(FLAGS.bs)
+    batch_size = FLAGS.bs
     model_fit_generator_arguments = {
         'generator': load_data_generator(train, batch_size),
         'steps_per_epoch': int(train.shape[0] / batch_size),
@@ -171,18 +172,21 @@ def main():
         # validation_steps Only relevant if validation_data is a generator
         'validation_steps': int(valid.shape[0] / batch_size),
         'verbose': 1,
-        'epochs': int(FLAGS.ep)
+        'epochs': FLAGS.ep
     }
     run_model(model_fit_generator_arguments, netModel=FLAGS.model)
 
 
 if __name__ == "__main__":
-    flags.DEFINE_string('ep', '', "epochs")
-    flags.DEFINE_string('model', '', "on of Basic, NVIDIA, LeNet, inception")
-    flags.DEFINE_string('bs', '', "batch size for generator")
-    flags.DEFINE_string('tf_debug', '', "of of '0', '1', '2', '3'")
-    flags.DEFINE_string('tb', '', "TensorBoard 0 or 1")
+    flags.DEFINE_integer('ep', 5, "epochs")
+    flags.DEFINE_string('model', 'Basic', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
+    flags.DEFINE_integer('bs', 32, "batch size for generator")
+    flags.DEFINE_string('tf_debug', '3', "tensorflow debug mode: 0, 1, 2, 3")
+    flags.DEFINE_boolean('tb', False, "Either to TensorBoard")
+    flags.DEFINE_integer('img_use', 1, "1 to use center image, 2 to use both center and left image , 3 for all")
+    flags.DEFINE_boolean('flip_img', True, "generate more data by flip images and negate steering angle")
+
     # example:
-    # python model.py --ep 10 --model NVIDIA  --bs 32 --tf_debug 3 --tb 0
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = FLAGS.tf_debug or '3'
+    # python model.py --img_use 1 --ep 10 --model NVIDIA  --bs 32 --tf_debug 3 --tb 
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = FLAGS.tf_debug
     main()

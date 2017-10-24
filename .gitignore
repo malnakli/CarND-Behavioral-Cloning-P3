@@ -1,6 +1,6 @@
 *.Ds_Store
-data/**/IMG
-data/**/*csv
+data/**
 .vscode
 *.pyc
 graph_logs/*
+*.h5
