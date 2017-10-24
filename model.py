@@ -7,8 +7,8 @@ from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 import os
 # NOTE: I am using keras 2.0.8 with tensorflow 1.3.0
-flags = tf.app.flags
-FLAGS = flags.FLAGS
+
+
 # ===================================================================== #
 # ========================  Combine Data ======================== #
 # ===================================================================== #
@@ -36,40 +36,48 @@ def combine_data(folders):
     Returns:
        Path of the new driving log file.
     """
-    list_ = []
-    headers = ['center', 'left', 'right',
-               'steering', 'throttle', 'break', 'speed']
-    for folder in folders:
-        df = pd.read_csv(folder + "/driving_log.csv",
-                         header=None, names=headers)
-        # get the relative path of the images
-
-        def get_image_path(row):
-            for image in headers[:3]:
-                row[image] = folder + '/' + \
-                    '/'.join(row[image].split('/')[-2:])
-
-            return row
-
-        df = df.apply(get_image_path, axis=1)
-        list_.append(df)
-
     driving_log_file = "./data/combine_driving_log.csv"
-    pd.concat(list_).to_csv(driving_log_file, index=False)
+    if FLAGS.recombine_data:
+        list_ = []
+        headers = ['center', 'left', 'right',
+                'steering', 'throttle', 'break', 'speed']
+        for folder in folders:
+            df = pd.read_csv(folder + "/driving_log.csv",
+                            header=None, names=headers)
+            # get the relative path of the images
 
+            def get_image_path(row):
+                for image in headers[:3]:
+                    row[image] = folder + '/' + \
+                        '/'.join(row[image].split('/')[-2:])
+
+                return row
+
+            df = df.apply(get_image_path, axis=1)
+            list_.append(df)
+
+        
+        pd.concat(list_).to_csv(driving_log_file, index=False)
+    
     return driving_log_file
 
 # ===================================================================== #
-# ========================  split Data ======================== #
+# ============================ split Data ============================= #
 # ===================================================================== #
 
 # @return pandas DataFrame
-
 
 def split_data(path_to_csv):
     # read  driveing log csv file
     data = pd.read_csv(path_to_csv)
     return train_test_split(data, test_size=0.2)
+
+# Calculate how much the length of data after augmentation
+def len_multiplier():
+    if FLAGS.flip_img:
+        return FLAGS.img_use * 2
+    else:
+        return FLAGS.img_use
 
 # ===================================================================== #
 # ========================  Load Data ======================== #
@@ -81,9 +89,10 @@ def load_data(samples):
     steerings = []
     for index, row in samples.iterrows():
         # create adjusted steering measurements for the side camera images
-        corrections = [0, 0.2, -0.2]
+        corrections = [0, 0.3, -0.15]
         for header, correction in zip(samples.columns[:FLAGS.img_use], corrections[:FLAGS.img_use]):
-            image = cv2.imread(row[header])
+            image = cv2.imread(row[header],0)
+            image = image[55:140, 10:310] # (85,300,1)
             steering = float(row['steering'])
             images.append(image)
             steerings.append(steering + correction)
@@ -103,7 +112,9 @@ def load_data(samples):
 def load_data_generator(samples, batch_size=32):
     num_samples = samples.shape[0]
     while 1:  # Loop forever so the generator never terminates
-        shuffle(samples)
+        # The reason this should work is that over many epochs, 
+        # random selection should ensure that all of your training data is taken into account.
+        shuffle(samples) 
         for offset in range(0, num_samples, batch_size):
             batch_samples = samples[offset: offset + batch_size]
             yield load_data(batch_samples)
@@ -119,8 +130,8 @@ def run_model(fit_kwargs, netModel='Basic'):
     # dynamically import modules 
     import_package = "network_models." + netModel 
     import_model = __import__(import_package, globals(), locals(), ['model'], 0)
-    model = import_model.model()
-    
+    model = import_model.model(FLAGS.plw)
+
     # TODO what are the differences among loss function and optimizer as well?
     # http://ruder.io/optimizing-gradient-descent/
 
@@ -158,20 +169,26 @@ def main():
     batch_size = FLAGS.bs
     model_fit_generator_arguments = {
         'generator': load_data_generator(train, batch_size),
-        'steps_per_epoch': int(train.shape[0] / batch_size),
-        # if you would like to use TensorBorad histograms,
-        # then do not used a generator for validation
-        # look at this issue https://github.com/fchollet/keras/issues/3358
+        'steps_per_epoch': int((train.shape[0] * len_multiplier()) / batch_size),
         'validation_data': load_data_generator(valid, batch_size),
-        # validation_steps Only relevant if validation_data is a generator
-        'validation_steps': int(valid.shape[0] / batch_size),
+        'validation_steps': int((valid.shape[0] * len_multiplier()) / batch_size),
         'verbose': 1,
         'epochs': FLAGS.ep
     }
+    if FLAGS.tb:
+        # if you would like to use TensorBorad histograms,
+        # then do not used a generator for validation
+        # look at this issue https://github.com/fchollet/keras/issues/3358
+        model_fit_generator_arguments['validation_data'] = load_data(valid)
+        # validation_steps Only relevant if validation_data is a generator
+        model_fit_generator_arguments['validation_steps'] = None
+    
     run_model(model_fit_generator_arguments, netModel=FLAGS.model)
 
 
 if __name__ == "__main__":
+    flags = tf.app.flags
+    FLAGS = flags.FLAGS
     flags.DEFINE_integer('ep', 5, "epochs")
     flags.DEFINE_string('model', 'Basic', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
     flags.DEFINE_integer('bs', 32, "batch size for generator")
@@ -179,8 +196,10 @@ if __name__ == "__main__":
     flags.DEFINE_boolean('tb', False, "Either to TensorBoard")
     flags.DEFINE_integer('img_use', 1, "1 to use center image, 2 to use both center and left image , 3 for all")
     flags.DEFINE_boolean('flip_img', True, "generate more data by flip images and negate steering angle")
-
+    flags.DEFINE_boolean('recombine_data', True, "rerun to combine all the data")
+    flags.DEFINE_boolean('plw', False, "pre load weight")
     # example:
     # python model.py --img_use 1 --ep 10 --model NVIDIA  --bs 32 --tf_debug 3 --tb 
+
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = FLAGS.tf_debug
     main()
