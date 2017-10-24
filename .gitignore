@@ -4,3 +4,4 @@ data/**
 *.pyc
 graph_logs/*
 *.h5
+run1
