@@ -40,10 +40,10 @@ def combine_data(folders):
     if FLAGS.recombine_data:
         list_ = []
         headers = ['center', 'left', 'right',
-                'steering', 'throttle', 'break', 'speed']
+                   'steering', 'throttle', 'break', 'speed']
         for folder in folders:
             df = pd.read_csv(folder + "/driving_log.csv",
-                            header=None, names=headers)
+                             header=None, names=headers)
             # get the relative path of the images
 
             def get_image_path(row):
@@ -56,9 +56,8 @@ def combine_data(folders):
             df = df.apply(get_image_path, axis=1)
             list_.append(df)
 
-        
         pd.concat(list_).to_csv(driving_log_file, index=False)
-    
+
     return driving_log_file
 
 # ===================================================================== #
@@ -67,12 +66,15 @@ def combine_data(folders):
 
 # @return pandas DataFrame
 
+
 def split_data(path_to_csv):
     # read  driveing log csv file
     data = pd.read_csv(path_to_csv)
     return train_test_split(data, test_size=0.2)
 
 # Calculate how much the length of data after augmentation
+
+
 def len_multiplier():
     if FLAGS.flip_img:
         return FLAGS.img_use * 2
@@ -91,14 +93,20 @@ def load_data(samples):
         # create adjusted steering measurements for the side camera images
         corrections = [0, 0.3, -0.15]
         for header, correction in zip(samples.columns[:FLAGS.img_use], corrections[:FLAGS.img_use]):
-            image = cv2.imread(row[header],0)
-            image = image[55:140, 10:310] # (85,300,1)
+            # image shape (160,320,3)
+            image = cv2.imread(row[header], 0)
+            # cut unusfull pixels from the image
+            image = image[55:140, 10:310]  # (85,300)
+            # reshape the image
+            image = np.reshape(image, image.shape[:] + (1,))  # (85,300, 1)
             steering = float(row['steering'])
             images.append(image)
             steerings.append(steering + correction)
             if FLAGS.flip_img:
                 # For helping with the left turn bias involves flipping images and taking the opposite sign of the steering measurement.
                 image_flipped = cv2.flip(image, 1)
+                image_flipped = np.reshape(
+                    image_flipped, image_flipped.shape[:] + (1,))  # (85,300, 1)
                 images.append(image_flipped)
                 steerings.append(-(steering + correction))
 
@@ -112,9 +120,9 @@ def load_data(samples):
 def load_data_generator(samples, batch_size=32):
     num_samples = samples.shape[0]
     while 1:  # Loop forever so the generator never terminates
-        # The reason this should work is that over many epochs, 
+        # The reason this should work is that over many epochs,
         # random selection should ensure that all of your training data is taken into account.
-        shuffle(samples) 
+        shuffle(samples)
         for offset in range(0, num_samples, batch_size):
             batch_samples = samples[offset: offset + batch_size]
             yield load_data(batch_samples)
@@ -127,9 +135,10 @@ def load_data_generator(samples, batch_size=32):
 
 def run_model(fit_kwargs, netModel='Basic'):
     # look at network model for more details for inside the model architecture
-    # dynamically import modules 
-    import_package = "network_models." + netModel 
-    import_model = __import__(import_package, globals(), locals(), ['model'], 0)
+    # dynamically import modules
+    import_package = "network_models." + netModel
+    import_model = __import__(
+        import_package, globals(), locals(), ['model'], 0)
     model = import_model.model(FLAGS.plw)
 
     # TODO what are the differences among loss function and optimizer as well?
@@ -169,12 +178,13 @@ def main():
     batch_size = FLAGS.bs
     model_fit_generator_arguments = {
         'generator': load_data_generator(train, batch_size),
-        'steps_per_epoch': int((train.shape[0] * len_multiplier()) / batch_size),
+        'steps_per_epoch': int(train.shape[0] / batch_size),
         'validation_data': load_data_generator(valid, batch_size),
-        'validation_steps': int((valid.shape[0] * len_multiplier()) / batch_size),
+        'validation_steps': int(valid.shape[0] / batch_size),
         'verbose': 1,
         'epochs': FLAGS.ep
     }
+
     if FLAGS.tb:
         # if you would like to use TensorBorad histograms,
         # then do not used a generator for validation
@@ -182,24 +192,35 @@ def main():
         model_fit_generator_arguments['validation_data'] = load_data(valid)
         # validation_steps Only relevant if validation_data is a generator
         model_fit_generator_arguments['validation_steps'] = None
-    
+    data_info(train, valid)
     run_model(model_fit_generator_arguments, netModel=FLAGS.model)
+
+
+def data_info(train, valid):
+    if int(FLAGS.tf_debug) <= 1:
+        print("train data length: ", train.shape[0] * len_multiplier())
+        print("valid data length: ", valid.shape[0] * len_multiplier())
+        print("train data shape: ", train.shape)
 
 
 if __name__ == "__main__":
     flags = tf.app.flags
     FLAGS = flags.FLAGS
     flags.DEFINE_integer('ep', 5, "epochs")
-    flags.DEFINE_string('model', 'Basic', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
+    flags.DEFINE_string(
+        'model', 'Basic', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
     flags.DEFINE_integer('bs', 32, "batch size for generator")
     flags.DEFINE_string('tf_debug', '3', "tensorflow debug mode: 0, 1, 2, 3")
     flags.DEFINE_boolean('tb', False, "Either to TensorBoard")
-    flags.DEFINE_integer('img_use', 1, "1 to use center image, 2 to use both center and left image , 3 for all")
-    flags.DEFINE_boolean('flip_img', True, "generate more data by flip images and negate steering angle")
-    flags.DEFINE_boolean('recombine_data', True, "rerun to combine all the data")
+    flags.DEFINE_integer(
+        'img_use', 1, "1 to use center image, 2 to use both center and left image , 3 for all")
+    flags.DEFINE_boolean(
+        'flip_img', True, "generate more data by flip images and negate steering angle")
+    flags.DEFINE_boolean('recombine_data', True,
+                         "rerun to combine all the data")
     flags.DEFINE_boolean('plw', False, "pre load weight")
     # example:
-    # python model.py --img_use 1 --ep 10 --model NVIDIA  --bs 32 --tf_debug 3 --tb 
+    # python model.py --img_use 1 --ep 10 --model NVIDIA  --bs 32 --tf_debug 3 --tb
 
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = FLAGS.tf_debug
     main()
