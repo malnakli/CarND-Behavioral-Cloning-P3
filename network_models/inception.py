@@ -1,12 +1,13 @@
 from keras.applications.inception_v3 import InceptionV3
 from keras.models import Sequential, Model
-from keras.layers import Flatten, Dense, Lambda, Cropping2D, ZeroPadding2D, Input
+from keras.layers import Flatten, Dense, Lambda, ZeroPadding2D, Input
 
 # Still have an issue run this on GPU with 4GB memroy
+
+
 def model(weights=False):
-    inputs = Input(shape=(160, 320, 3), name='InceptionV3_input')
+    inputs = Input(shape=(85, 300, 3), name='InceptionV3_input')
     op = Lambda(lambda x: (x / 255.0) - 0.5)(inputs)
-    op = Cropping2D(cropping=((65, 20), (0, 0)))(op)
     # InceptionV3 need to be at least (150, 150, 3)
     op = ZeroPadding2D(padding=((60, 20), (0, 0)))(op)
 
@@ -14,7 +15,7 @@ def model(weights=False):
         app_model = InceptionV3(
             include_top=False, weights='imagenet', input_tensor=op)
     else:
-         app_model = InceptionV3(
+        app_model = InceptionV3(
             include_top=False, weights=None, input_tensor=op)
 
     top_model = Sequential()
@@ -25,6 +26,3 @@ def model(weights=False):
 
     model = Model(inputs=app_model.input, outputs=top_model(app_model.output))
     return model
-
-
-

@@ -8,9 +8,7 @@ from keras.layers.core import Dropout
 # @return keras model
 def model(weights=False):
     model = Sequential()
-    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
-    # delete unuseful pixels
-    model.add(Cropping2D(cropping=((65, 20), (0, 0))))
+    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(85, 300, 3)))
     model.add(Conv2D(filters=6, kernel_size=(5, 5), activation='relu'))
     model.add(MaxPooling2D())
     model.add(Conv2D(filters=6, kernel_size=(5, 5), activation='relu'))
@@ -20,8 +18,8 @@ def model(weights=False):
     model.add(Dense(84))
     model.add(Dropout(.5))
     model.add(Dense(1))
-    
+
     if weights:
-         model.load_weights('LeNet.h5')
+        model.load_weights('LeNet.h5')
 
     return model
