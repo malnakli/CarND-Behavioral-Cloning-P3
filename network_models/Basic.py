@@ -15,6 +15,6 @@ def model(weights=False):
         model.add(Dense(1))
 
     if weights:
-        model.load_weights('LeNet.h5')
+        model.load_weights('Basic.h5')
 
     return model

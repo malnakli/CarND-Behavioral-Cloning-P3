@@ -9,8 +9,6 @@ def model(weights=False):
 
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(85, 300, 1)))
-    # delete unuseful pixels
-    #model.add(Cropping2D(cropping=((65, 20), (0, 0))))
     model.add(Conv2D(filters=24, kernel_size=(5, 5),
                      strides=(2, 2), activation='relu'))
     model.add(Conv2D(filters=36, kernel_size=(5, 5),

@@ -91,7 +91,7 @@ def load_data(samples):
     steerings = []
     for index, row in samples.iterrows():
         # create adjusted steering measurements for the side camera images
-        corrections = [0, 0.3, -0.15]
+        corrections = [0, 0.3, -0.2]
         for header, correction in zip(samples.columns[:FLAGS.img_use], corrections[:FLAGS.img_use]):
             # image shape (160,320,3)
             image = cv2.imread(row[header], 0)
@@ -198,8 +198,8 @@ def main():
 
 def data_info(train, valid):
     if int(FLAGS.tf_debug) <= 1:
-        print("train data length: ", train.shape[0] * len_multiplier())
-        print("valid data length: ", valid.shape[0] * len_multiplier())
+        print("train data length: {:,} ".format(train.shape[0] * len_multiplier()))
+        print("valid data length: {:,} ".format(valid.shape[0] * len_multiplier()))
         print("train data shape: ", train.shape)
 
 
