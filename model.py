@@ -203,7 +203,7 @@ def main():
 
 
 def data_info(train, valid):
-    if int(FLAGS.tf_debug) <= 1:
+    if int(FLAGS.tf_debug) <= 2:
         print("train data length: {:,} ".format(train.shape[0] * len_multiplier()))
         print("valid data length: {:,} ".format(valid.shape[0] * len_multiplier()))
         print("train data shape: ", train.shape)
