@@ -133,7 +133,7 @@ def load_data_generator(samples, batch_size=32):
 # ===================================================================== #
 
 
-def run_model(fit_kwargs, netModel='Basic'):
+def run_model(fit_kwargs, netModel='NVIDIA'):
     # look at network model for more details for inside the model architecture
     # dynamically import modules
     import_package = "network_models." + netModel
@@ -160,8 +160,14 @@ def run_model(fit_kwargs, netModel='Basic'):
     # embeddings_freq: frequency (in epochs) at which selected embedding layers will be saved.
     # embeddings_layer_names: a list of names of layers to keep eye on. If None or empty list all the embedding layer will be watched.
 
-    tbCallback = TensorBoard(log_dir="./graph_logs", histogram_freq=0,
-                             write_graph=True, write_images=True)
+    # to run tensoerborad: tensorboard --logdir=tb_logs
+    if FLAGS.tb > 0:
+        # example: tb_logs/NIVDIA/run2
+        log_dir = './tb_logs/' + netModel + '/run' + str(FLAGS.tb) 
+        tbCallback = TensorBoard(log_dir=log_dir, histogram_freq=1,
+                                write_graph=True, write_images=True)
+    else:
+        tbCallback =None
 
     # # https://github.com/fchollet/keras/pull/8023 bug in shuffle argument in keras 2.0.8
     model.fit_generator(**fit_kwargs, callbacks=[tbCallback])
@@ -185,7 +191,7 @@ def main():
         'epochs': FLAGS.ep
     }
 
-    if FLAGS.tb:
+    if FLAGS.tb > 0:
         # if you would like to use TensorBorad histograms,
         # then do not used a generator for validation
         # look at this issue https://github.com/fchollet/keras/issues/3358
@@ -208,10 +214,10 @@ if __name__ == "__main__":
     FLAGS = flags.FLAGS
     flags.DEFINE_integer('ep', 5, "epochs")
     flags.DEFINE_string(
-        'model', 'Basic', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
+        'model', 'NVIDIA', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
     flags.DEFINE_integer('bs', 32, "batch size for generator")
     flags.DEFINE_string('tf_debug', '3', "tensorflow debug mode: 0, 1, 2, 3")
-    flags.DEFINE_boolean('tb', False, "Either to TensorBoard")
+    flags.DEFINE_integer('tb', 1, "TensorBoard, disable if <= 0, the number of run ")
     flags.DEFINE_integer(
         'img_use', 1, "1 to use center image, 2 to use both center and left image , 3 for all")
     flags.DEFINE_boolean(
