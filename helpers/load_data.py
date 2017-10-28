@@ -24,14 +24,16 @@ def region_of_interest(img):
     formed from `vertices`. The rest of the image is set to black.
     """
     imshape = img.shape
-    vertices = np.array(
-    [[
+    vertices = np.array([[
+        (imshape[1]*.1,imshape[0]),
         (0,imshape[0]),
-        (0, imshape[0]*.75),
-        (imshape[1]*.45,imshape[0]*.5),
-        (imshape[1]*.55,imshape[0]*.5),
-        (imshape[1],imshape[0]*.75), 
-        (imshape[1],imshape[0])
+        (0, imshape[0]*.70),
+        (imshape[1]*.40,imshape[0]*.45),
+        (imshape[1]*.60,imshape[0]*.45),
+        (imshape[1],imshape[0]*.70), 
+        (imshape[1],imshape[0]),
+        (imshape[1]*.9,imshape[0]),
+        (imshape[1]*.5,imshape[0]*.8),
         
     ]], dtype=np.int32)
     #defining a blank mask to start with
@@ -72,7 +74,7 @@ def preprocess_image(src, model,flip_img=False, gray=False):
             image = cv2.imread(src) # shape (160, 320,3)
     else:
         image = src
-        
+
     image = region_of_interest(image) # (160,320)
     if model in ['MobileNet','vgg19','vgg16','inception','NVIDIA']:
          image = resize_img_square(image,224) # shape (224,224)
