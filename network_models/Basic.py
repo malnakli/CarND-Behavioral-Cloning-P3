@@ -6,7 +6,7 @@ import tensorflow as tf
 # @return keras model
 def model(weights=False):
     model = Sequential()
-    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(200, 200, 3)))
+    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(32, 32, 3)))
     model.add(Flatten())
     # it is used for tensorBorad
     with tf.name_scope('connect_layers'):

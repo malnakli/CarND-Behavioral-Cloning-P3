@@ -71,8 +71,11 @@ def preprocess_image(image_path, FLAGS, gray=False):
         image = cv2.imread(image_path) # shape (160, 320,3)
     
     image = region_of_interest(image) # (160,320)
-    image = resize_img_square(image,200) # shape (200,200)
-
+    if FLAGS.model in ['MobileNet','vgg19','vgg16','inception','NVIDIA']:
+         image = resize_img_square(image,224) # shape (224,224)
+    elif FLAGS.model in ['Basic','LeNet']:
+        image = resize_img_square(image,32) # shape (32,32)
+    
     if FLAGS.flip_img:
         image_flipped = cv2.flip(image, 1)
     

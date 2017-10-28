@@ -91,7 +91,7 @@ if __name__ == "__main__":
     FLAGS = flags.FLAGS
     flags.DEFINE_integer('ep', 5, "epochs")
     flags.DEFINE_string(
-        'model', 'NVIDIA', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19")
+        'model', 'NVIDIA', "one of: Basic, NVIDIA, LeNet, inception, vgg16, vgg19, MobileNet")
     flags.DEFINE_integer('bs', 32, "batch size for generator")
     flags.DEFINE_string('tf_debug', '3', "tensorflow debug mode: 0, 1, 2, 3")
     flags.DEFINE_integer('tb', 1, "TensorBoard, disable if <= 0, the number of run ")

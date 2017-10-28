@@ -6,7 +6,7 @@ from keras.layers.core import Dropout
 
 # Still have an issue run this on GPU with 4GB memroy
 def model(weights=True,freez_pertrian_layers=True):
-    inputs = Input(shape=(200, 200, 3), name='vgg_input')
+    inputs = Input(shape=(224, 224, 3), name='vgg_input')
     op = Lambda(lambda x: (x / 255.0) - 0.5)(inputs)
 
     if weights:
