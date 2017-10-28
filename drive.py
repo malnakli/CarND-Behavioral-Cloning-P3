@@ -62,11 +62,8 @@ def telemetry(sid, data):
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         image_array = np.asarray(image)
         
-        # uncomment the following if the model train with gray scale image
-        import cv2
-        # image_array = cv2.cvtColor(np.array(image_array), cv2.COLOR_RGB2GRAY)
-        image_array = image_array[55:140, 10:310] 
-        # image_array = np.reshape(image_array, image_array.shape[:] + (1,)) 
+        from helpers.load_data import preprocess_image
+        image_array,flip = preprocess_image(image_array,model=args.model.replace('.h5',''))
         
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
@@ -126,7 +123,16 @@ if __name__ == '__main__':
         print('You are using Keras version ', keras_version,
               ', but the model was built using ', model_version)
 
-    model = load_model(args.model)
+    # fix Unknown activation function:relu6
+    # https://github.com/fchollet/keras/issues/7431
+    # https://keras.io/applications/#mobilenet
+    if args.model in ["MobileNet.h5"]: 
+        from keras.utils import CustomObjectScope 
+        from keras.applications.mobilenet import relu6 ,DepthwiseConv2D
+        with CustomObjectScope({'relu6': relu6,'DepthwiseConv2D': DepthwiseConv2D}):
+            model = load_model(args.model)
+    else:
+        model = load_model(args.model)
 
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))

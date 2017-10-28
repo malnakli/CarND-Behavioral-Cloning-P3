@@ -52,7 +52,7 @@ def region_of_interest(img):
     return masked_image
 
 
-def preprocess_image(image_path, FLAGS, gray=False):
+def preprocess_image(src, model,flip_img=False, gray=False):
     """pre processes image for training.
     Arguments:
         image_path: the full or relative path of the image 
@@ -63,20 +63,23 @@ def preprocess_image(image_path, FLAGS, gray=False):
     """
     image = None
     image_flipped = None
-    if gray :
-        image = cv2.imread(image_path, 0) # shape (160, 320)
-        image = np.reshape(image, image.shape[:] + (1,))   # shape (160, 320, 1)
+    if type(src) is not np.ndarray:
+        if gray:
+            image = cv2.imread(src, 0) # shape (160, 320)
+            image = np.reshape(image, image.shape[:] + (1,))   # shape (160, 320, 1)
 
-    else :
-        image = cv2.imread(image_path) # shape (160, 320,3)
-    
+        else :
+            image = cv2.imread(src) # shape (160, 320,3)
+    else:
+        image = src
+        
     image = region_of_interest(image) # (160,320)
-    if FLAGS.model in ['MobileNet','vgg19','vgg16','inception','NVIDIA']:
+    if model in ['MobileNet','vgg19','vgg16','inception','NVIDIA']:
          image = resize_img_square(image,224) # shape (224,224)
-    elif FLAGS.model in ['Basic','LeNet']:
+    elif model in ['Basic','LeNet']:
         image = resize_img_square(image,32) # shape (32,32)
     
-    if FLAGS.flip_img:
+    if flip_img:
         image_flipped = cv2.flip(image, 1)
     
     return image,image_flipped
@@ -91,7 +94,7 @@ def load_data(samples,FLAGS):
         for header, correction in zip(samples.columns[:FLAGS.img_use], corrections[:FLAGS.img_use]):
             
             steering = float(row['steering'])
-            image , image_flipped =  preprocess_image(row[header],FLAGS,gray=False)
+            image , image_flipped =  preprocess_image(row[header],model=FLAGS.model,flip_img=FLAGS.flip_img,gray=False)
             if FLAGS.flip_img:
                 images.append(image_flipped)
                 steerings.append(-(steering + correction))
