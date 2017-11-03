@@ -25,15 +25,12 @@ def region_of_interest(img):
     """
     imshape = img.shape
     vertices = np.array([[
-        (imshape[1]*.1,imshape[0]),
-        (0,imshape[0]),
+        (0,imshape[0]*.85),
         (0, imshape[0]*.55),
         (imshape[1]*.40,imshape[0]*.40),
         (imshape[1]*.60,imshape[0]*.40),
         (imshape[1],imshape[0]*.55), 
-        (imshape[1],imshape[0]),
-        (imshape[1]*.9,imshape[0]),
-        (imshape[1]*.5,imshape[0]*.8),
+        (imshape[1],imshape[0]*.85)
         
     ]], dtype=np.int32)
     #defining a blank mask to start with

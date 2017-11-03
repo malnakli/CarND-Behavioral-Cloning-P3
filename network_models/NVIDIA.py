@@ -19,8 +19,9 @@ def model(weights=False):
     model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
     model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
     model.add(Flatten())
-    model.add(Dense(100,kernel_regularizer=regularizers.l2(0.01)))
+    model.add(Dense(100,kernel_regularizer=regularizers.l2(0.04)))
     model.add(Dense(50))
+    model.add(Dropout(.5))
     model.add(Dense(10,kernel_regularizer=regularizers.l2(0.01)))
     model.add(Dense(1))
 

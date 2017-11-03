@@ -24,7 +24,6 @@ def get_dir_names(FLAGS):
     folders_include = FLAGS.folders_include.split(',')
     # add the root to the names of the folders
     folders_include = np.core.defchararray.add(root_dir + '/',folders_include)
-    print(folders_include)
     return  np.extract(np.isin(folders , folders_include),folders)
 
 
