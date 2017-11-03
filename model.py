@@ -58,7 +58,7 @@ def run_model(fit_kwargs, netModel='NVIDIA'):
 # ======================== Execute code ======================== #
 # ===================================================================== #
 def main():
-    csv_file_path = combine_data(get_dir_names(),rec_data=FLAGS.rec_data)
+    csv_file_path = combine_data(get_dir_names(FLAGS),rec_data=FLAGS.rec_data)
     train, valid = split_data(csv_file_path)
     batch_size = FLAGS.bs
 
@@ -103,6 +103,8 @@ if __name__ == "__main__":
     flags.DEFINE_boolean('rec_data', True,
                          "rerun combine_data function to combine all the data")
     flags.DEFINE_boolean('plw', False, "pre load weight")
+    flags.DEFINE_string('folders_include', 'udacity', "data folders to be included in the training")
+
     # example:
     # python model.py --img_use 1 --ep 10 --model NVIDIA  --bs 32 --tf_debug 3 --tb
 

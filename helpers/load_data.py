@@ -92,7 +92,7 @@ def load_data(samples,FLAGS):
     steerings = []
     for index, row in samples.iterrows():
         # create adjusted steering measurements for the side camera images
-        corrections = [0, 0.3, -0.2]
+        corrections = [0, 0.3, -0.3]
         for header, correction in zip(samples.columns[:FLAGS.img_use], corrections[:FLAGS.img_use]):
             
             steering = float(row['steering'])
