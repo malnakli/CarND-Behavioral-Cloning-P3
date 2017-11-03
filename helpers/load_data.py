@@ -27,10 +27,10 @@ def region_of_interest(img):
     vertices = np.array([[
         (imshape[1]*.1,imshape[0]),
         (0,imshape[0]),
-        (0, imshape[0]*.70),
-        (imshape[1]*.40,imshape[0]*.45),
-        (imshape[1]*.60,imshape[0]*.45),
-        (imshape[1],imshape[0]*.70), 
+        (0, imshape[0]*.55),
+        (imshape[1]*.40,imshape[0]*.40),
+        (imshape[1]*.60,imshape[0]*.40),
+        (imshape[1],imshape[0]*.55), 
         (imshape[1],imshape[0]),
         (imshape[1]*.9,imshape[0]),
         (imshape[1]*.5,imshape[0]*.8),
@@ -76,7 +76,7 @@ def preprocess_image(src, model,flip_img=False, gray=False):
         image = src
 
     image = region_of_interest(image) # (160,320)
-    if model in ['MobileNet','vgg19','vgg16','inception','NVIDIA']:
+    if model in ['MobileNet','vgg19','vgg16','inception']:
          image = resize_img_square(image,224) # shape (224,224)
     elif model in ['Basic','LeNet']:
         image = resize_img_square(image,32) # shape (32,32)

@@ -9,7 +9,7 @@ from keras import regularizers
 def model(weights=False):
 
     model = Sequential()
-    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(224, 224, 3)))
+    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
     model.add(Conv2D(filters=24, kernel_size=(5, 5),
                      strides=(2, 2), activation='relu'))
     model.add(Conv2D(filters=36, kernel_size=(5, 5),
