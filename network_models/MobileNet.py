@@ -12,11 +12,15 @@ def model(weights=True,freez_pertrian_layers=True):
     for layer in app_model.layers:
         layer.trainable = not freez_pertrian_layers # trainable has to be false in order to freez the layers
 
-   
     op = Flatten(input_shape=app_model.output_shape[1:])(app_model.output)
     op = Dense(128, activation='relu')(op)
     op = Dense(64, activation='relu')(op)
     op = Dropout(.5)(op)
     outputs =  Dense(1)(op)
 
-    return Model(inputs=inputs, outputs=outputs)
+    model =  Model(inputs=inputs, outputs=outputs)
+
+    if weights:
+        model.load_weights('MobileNet.h5')
+
+    return model

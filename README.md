@@ -50,7 +50,17 @@ The model.py file contains the code for training and saving the convolution neur
 
 #### 1. An appropriate model architecture has been employed
 
-ResourceExhaustedError (see above for traceback): OOM when allocating tensor with shape[32,64,105,150]
+I have implemented few models (see network_models folder for more details) in order to see how each model behave. However, Since I am limit on GPU resourses, I first run (network_models/Basic.py) which did not give any good result. After I implement LeNet architecture, which it could better profromance, but still the car it did not stay on the track. I implmented NVIDIA architecture which was provided on Udacity class, I saw the improvmented. 
+
+However, after many testing with NVIDIA model I relaized I need more data, in order to train the model, so I generate more than 100 K data, by using my own generated data plus udacity. As well, I use the right and left images and I flipped image too. In fact, it help the model to give a lower loss rate, but the car was not moving smooth and safe on the track. I guessed the issue was that most of the images extractd from the simulator were smilar so the model was kind of retrain with same images.
+
+At this point I started expolaring pretrain models such as InceptionV3, VGG16, VGG19 and MobileNet. 
+Because of memory allocation error (ResourceExhaustedError) while runing InceptionV3, VGG16, VGG19 on g2.4(1 GPU, 4 GB memory) instance on Amazon Web Server, I upgrade the instance to 8 GB memory. Traning VGG models take very long time (almost an hour four few epoucs); therefore, I used MobileNet which was faster by a lot to train epicaly when I freez pretrain layer.
+
+In deed, first I used NVIDIA model in order to find other issue with traing rather than the model itself. For example, I have trained images with differnt region of interset, number of samples, number of epochs, and with left and right images. after I found the best combiantion that give a better ruesult, I start train MobileNet with these combiantion.
+
+Frist, I disable freezing the pretrain layter, Then I freeze pretrain layter and only train the fully connect layer 
+
 
 My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
@@ -126,8 +136,9 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
-# References
+# My References 
 1.[Hyperparameters to look out for in Neural Networks](https://www.analyticsvidhya.com/blog/2016/10/tutorial-optimizing-neural-networks-using-keras-with-image-recognition-case-study/#six)
 2. [Why You Need to Start Using Embedding Layers](https://medium.com/towards-data-science/deep-learning-4-embedding-layers-f9a02d55ac12)
 3. [Keras Cheat Sheet: Neural Networks in Python](https://www.datacamp.com/community/blog/keras-cheat-sheet)
 4. [keras augmentation example ](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)
+5. [37 Reasons why your Neural Network is not working](https://blog.slavv.com/37-reasons-why-your-neural-network-is-not-working-4020854bd607)
