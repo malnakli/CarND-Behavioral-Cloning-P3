@@ -31,15 +31,19 @@ The goals / steps of this project are the following:
 #### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
+* helpers/prepare_data.py read data from csv files and combine them into one csv
+* helpers/load_data.py add images into numpy array + streeing angle
+* network_models/MobileNet.py contain the model should be used for this project
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* MobileNet.h5 containing a trained convolution neural network 
+* README.md summarizing the results
+* video.mp4 video output
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```
-python drive.py model.h5
+python drive.py MobileNet.h5
 ```
 
 #### 3. Submission code is usable and readable
@@ -145,8 +149,9 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
 # My References 
-1.[Hyperparameters to look out for in Neural Networks](https://www.analyticsvidhya.com/blog/2016/10/tutorial-optimizing-neural-networks-using-keras-with-image-recognition-case-study/#six)
-2. [Why You Need to Start Using Embedding Layers](https://medium.com/towards-data-science/deep-learning-4-embedding-layers-f9a02d55ac12)
-3. [Keras Cheat Sheet: Neural Networks in Python](https://www.datacamp.com/community/blog/keras-cheat-sheet)
-4. [keras augmentation example ](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)
-5. [37 Reasons why your Neural Network is not working](https://blog.slavv.com/37-reasons-why-your-neural-network-is-not-working-4020854bd607)
+> Has nothing to do with the project
+1.[Hyperparameters to look out for in Neural Networks](https://www.analyticsvidhya.com/blog/2016/10/tutorial-optimizing-neural-networks-using-keras-with-image-recognition-case-study/#six)            
+2. [Why You Need to Start Using Embedding Layers](https://medium.com/towards-data-science/deep-learning-4-embedding-layers-f9a02d55ac12)          
+3. [Keras Cheat Sheet: Neural Networks in Python](https://www.datacamp.com/community/blog/keras-cheat-sheet)             
+4. [keras augmentation example ](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)     
+5. [37 Reasons why your Neural Network is not working](https://blog.slavv.com/37-reasons-why-your-neural-network-is-not-working-4020854bd607)        
