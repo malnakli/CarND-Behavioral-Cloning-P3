@@ -50,41 +50,49 @@ The model.py file contains the code for training and saving the convolution neur
 
 #### 1. An appropriate model architecture has been employed
 
-I have implemented few models (see network_models folder for more details) in order to see how each model behave. However, Since I am limit on GPU resourses, I first run (network_models/Basic.py) which did not give any good result. After I implement LeNet architecture, which it could better profromance, but still the car it did not stay on the track. I implmented NVIDIA architecture which was provided on Udacity class, I saw the improvmented. 
+I have implemented few models (look at network_models folder for more details) in order to exam how each model behave.    
+However, Since I have a limit resouces on GPU hardward, first i ran (network_models/Basic.py) which did not give any good result.     
+After that I implemented LeNet architecture, which it gave better profromance, but still the car did not stay on the track. Next, I implmented NVIDIA architecture, which provided by Udacity during the class.     
 
-However, after many testing with NVIDIA model I relaized I need more data, in order to train the model, so I generate more than 100 K data, by using my own generated data plus udacity. As well, I use the right and left images and I flipped image too. In fact, it help the model to give a lower loss rate, but the car was not moving smooth and safe on the track. I guessed the issue was that most of the images extractd from the simulator were smilar so the model was kind of retrain with same images.
+However, after many testing with NVIDIA model I relaized that I need to collect more data, in order to train the model, so I generate more than 100 K data, by using my own generated data + udacity + the right and left images + flipping each image too. In fact, it help the model to give a lower loss rate, but the car was not moving smooth and safe on the track. I guessed that the issue was most of the images extractd from the simulator were similar so the model was kind of training with same images over and over.
 
-At this point I started expolaring pretrain models such as InceptionV3, VGG16, VGG19 and MobileNet. 
-Because of memory allocation error (ResourceExhaustedError) while runing InceptionV3, VGG16, VGG19 on g2.4(1 GPU, 4 GB memory) instance on Amazon Web Server, I upgrade the instance to 8 GB memory. Traning VGG models take very long time (almost an hour four few epoucs); therefore, I used MobileNet which was faster by a lot to train epicaly when I freez pretrain layer.
+When I reached to this point, I started expolaring pretrain models such as InceptionV3, VGG16, VGG19 and MobileNet, (which are defind on network_models folder). 
+Nevertheless, because of memory allocation error (ResourceExhaustedError) while runing InceptionV3, VGG16, VGG19 on g2.4(1 GPU, 4 GB memory) instance on Amazon Web Server, I upgrade the instance to 8 GB memory (g3.4). Traning VGG models take very long time (almost an hour four few epoucs); therefore, I used MobileNet which was faster to train epically when I freez the pretrain layers.
+
+The final model I use is MobileNet, therefore run `python driver.py MobileNet.h5`
+
+I removed the fully connected layers from MobileNet, and I added new three fully connected layers. Also,
+the model includes RELU layers to introduce nonlinearity (network_models/MobileNet.py #8), and the data is normalized in the model using a Keras lambda layer (network_models/MobileNet.py #16 & #17). 
+
+#### 2. Attempts to reduce overfitting in the model
+
+The model contains dropout layers in order to reduce overfitting (network_models/MobileNet.py #18) 
+
+#####
+Also, I used regularizers by penalizing the wieght on some of the fully connected layers, because the steering angle does not only depned on images, speed has an effect by how much the steering should shift.
+#####
+
+The model was trained and validated on different data sets to ensure that the model was not overfitting (model.py #62). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+
+#### 3. Model parameter tuning
+
+The model used an adam optimizer, so the learning rate was not tuned manually (model.py # 25).
+
+#### 4. Appropriate training data
+
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road and also I filpped the images (by using cv2.flip) and negate the steering angle
+
+For details about how I created the training data, see the next section. 
+
+### Model Architecture and Training Strategy
+
+#### 1. Solution Design Approach
+
 
 In deed, first I used NVIDIA model in order to find other issue with traing rather than the model itself. For example, I have trained images with differnt region of interset, number of samples, number of epochs, and with left and right images. after I found the best combiantion that give a better ruesult, I start train MobileNet with these combiantion.
 
 Frist, I disable freezing the pretrain layter, Then I freeze pretrain layter and only train the fully connect layer 
 
-
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
-
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
-
-####2. Attempts to reduce overfitting in the model
-
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-#### 3. Model parameter tuning
-
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
-
-####4. Appropriate training data
-
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
-
-For details about how I created the training data, see the next section. 
-
-###Model Architecture and Training Strategy
-
-####1. Solution Design Approach
 
 The overall strategy for deriving a model architecture was to ...
 
@@ -110,7 +118,7 @@ Here is a visualization of the architecture (note: visualizing the architecture 
 
 ####3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+To capture good driving behavior, I first recorded one lap on track one using center lane driving. Here is an example image of center lane driving:
 
 ![alt text][image2]
 
