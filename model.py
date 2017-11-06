@@ -106,7 +106,6 @@ if __name__ == "__main__":
     flags.DEFINE_string('folders_include', 'udacity', "data folders to be included in the training")
 
     # example:
-    # python model.py --img_use 1 --ep 10 --model NVIDIA  --bs 32 --tf_debug 2 --tb 1 --notb_graph --nplw 
-
+    # python model.py --model MobileNet  --img_use 3 --tb 0 --tf_debug 2 --bs 8 --ep 70 --noplw  --folders_include ct1 --flip_img --notb_graph
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = FLAGS.tf_debug
     main()

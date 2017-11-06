@@ -17,6 +17,14 @@ The goals / steps of this project are the following:
 [region_of_interest]: ./images/region_of_interest.png "region_of_interest"
 [region_of_interest1]: ./images/region_of_interest1.png "region_of_interest1"
 [region_of_interest2]: ./images/region_of_interest2.png "region_of_interest2"
+[fully_connected]: ./images/fully_connected.png "fully_connected"
+[MobileNet]: ./images/MobileNet.png "MobileNet"
+[center_lane_driving]: ./images/center_lane_driving.jpg "center_lane_driving"
+[left_lane_driving]: ./images/left_lane_driving.jpg "left_lane_driving"
+[right_lane_driving]: ./images/right_lane_driving.jpg "right_lane_driving"
+[flipped_center_lane_driving]: ./images/flipped_center_lane_driving.png "flipped_center_lane_driving"
+[flipped_left_lane_driving]: ./images/flipped_left_lane_driving.png "flipped_left_lane_driving"
+[flipped_right_lane_driving]: ./images/flipped_right_lane_driving.png "flipped_right_lane_driving"
 
 
 ## Rubric Points
@@ -91,17 +99,17 @@ In deed, first I used NVIDIA model in order to find other issue with training ra
 For example, I have trained images with following:
 region of interest: (helpers/load_data.py #27)
 
-My first try: 
+My first try:        
 ![first one ][region_of_interest1] 
 
-Another one
+Another one               
 ![other one ][region_of_interest2] 
 
-The final one
+The final one               
 ![the final one][region_of_interest]
 
 number of samples: 10k-100k (10K was chosen)
-number of epochs: 10-50 (50 was chosen)
+number of epochs: 10-70 (50 was chosen)
 left and right images: (I used left and right images in the end)
 Using gray images: I found it has no big difference whether I trained with gray image or RGB images.
 
@@ -109,49 +117,53 @@ After selected the best combination I trained MobileNet model with freezing the 
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
-####2. Final Model Architecture
+####2. Final Model Architecture (Done)
 
-The final model architecture (network_model/MobileNet.py) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (network_model/MobileNet.py) consisted of a MobileNet architecture exculding the top + 3 fully connect layers
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+Here is a visualization of the architecture
 
-![alt text][image1]
+![alt text][fully_connected] 
+
+
+Here is the an screenshot of the implementation fo MobileNet model in Keras.
+
+
+![alt text][MobileNet]
 
 ####3. Creation of the Training Set & Training Process
 
 To capture good driving behavior, I first recorded one lap on track one using center lane driving. Here is an example image of center lane driving:
 
-![alt text][image2]
+![alt text][center_lane_driving]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to turn when it close to the edge of the road.
+These images show what a recovery looks like starting from left,right and flipped center :
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+![alt text][left_lane_driving]       
+![alt text][right_lane_driving]        
 
-Then I repeated this process on track two in order to get more data points.
+Then I repeated this process on track two in order to get more data points but I never used the data.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+To augment the data sat, I also flipped images (center, left and right) and angles thinking that this would help the model to see different images.
+For example, here is an image that has then been flipped:
 
-![alt text][image6]
-![alt text][image7]
+![alt text][flipped_center_lane_driving]         
+![alt text][flipped_left_lane_driving]         
+![alt text][flipped_right_lane_driving]         
 
-Etc ....
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
-
+I resize the images to the shape (224,224,3) which is require for MobileNet modle.
 
 I finally randomly shuffled the data set and put Y% of the data into a validation set. 
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 70 as evidenced by  loss: 0.0570 - val_loss: 0.0530.    
+Also, I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
 # My References 
-> Has nothing to do with the project
+> Has nothing to do with the project       
 1.[Hyperparameters to look out for in Neural Networks](https://www.analyticsvidhya.com/blog/2016/10/tutorial-optimizing-neural-networks-using-keras-with-image-recognition-case-study/#six)            
 2. [Why You Need to Start Using Embedding Layers](https://medium.com/towards-data-science/deep-learning-4-embedding-layers-f9a02d55ac12)          
 3. [Keras Cheat Sheet: Neural Networks in Python](https://www.datacamp.com/community/blog/keras-cheat-sheet)             
 4. [keras augmentation example ](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)     
 5. [37 Reasons why your Neural Network is not working](https://blog.slavv.com/37-reasons-why-your-neural-network-is-not-working-4020854bd607)        
-
-
-python model.py --model MobileNet  --img_use 3 --tb 0 --tf_debug 2 --bs 8 --ep 70 --noplw  --folders_include ct1 --flip_img --notb_graph
