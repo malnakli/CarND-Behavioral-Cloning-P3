@@ -14,13 +14,10 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[region_of_interest]: ./images/region_of_interest.png "region_of_interest"
+[region_of_interest1]: ./images/region_of_interest1.png "region_of_interest1"
+[region_of_interest2]: ./images/region_of_interest2.png "region_of_interest2"
+
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -52,69 +49,69 @@ The model.py file contains the code for training and saving the convolution neur
 
 ### Model Architecture and Training Strategy
 
-#### 1. An appropriate model architecture has been employed
+#### 1. An appropriate model architecture has been employed (Done)
 
 I have implemented few models (look at network_models folder for more details) in order to exam how each model behave.    
-However, Since I have a limit resouces on GPU hardward, first i ran (network_models/Basic.py) which did not give any good result.     
-After that I implemented LeNet architecture, which it gave better profromance, but still the car did not stay on the track. Next, I implmented NVIDIA architecture, which provided by Udacity during the class.     
+However, Since I have a limit resources on GPU hardware, first i ran (network_models/Basic.py) which did not give any good result.     
+After that I implemented LeNet architecture, which it gave better performance, but still the car did not stay on the track. Next, I implemented NVIDIA architecture, which provided by Udacity during the class.     
 
-However, after many testing with NVIDIA model I relaized that I need to collect more data, in order to train the model, so I generate more than 100 K data, by using my own generated data + udacity + the right and left images + flipping each image too. In fact, it help the model to give a lower loss rate, but the car was not moving smooth and safe on the track. I guessed that the issue was most of the images extractd from the simulator were similar so the model was kind of training with same images over and over.
+However, after many testing with NVIDIA model I realized that I need to collect more data, in order to train the model, so I generate more than 100 K data, by using my own generated data + udacity + the right and left images + flipping each image too. In fact, it help the model to give a lower loss rate, but the car was not moving smooth and safe on the track. I guessed that the issue was most of the images extracted from the simulator were similar so the model was kind of training with same images over and over.
 
-When I reached to this point, I started expolaring pretrain models such as InceptionV3, VGG16, VGG19 and MobileNet, (which are defind on network_models folder). 
-Nevertheless, because of memory allocation error (ResourceExhaustedError) while runing InceptionV3, VGG16, VGG19 on g2.4(1 GPU, 4 GB memory) instance on Amazon Web Server, I upgrade the instance to 8 GB memory (g3.4). Traning VGG models take very long time (almost an hour four few epoucs); therefore, I used MobileNet which was faster to train epically when I freez the pretrain layers.
+When I reached to this point, I started exploring pretrain models such as InceptionV3, VGG16, VGG19 and MobileNet, (which are defined on network_models folder). 
+Nevertheless, because of memory allocation error (ResourceExhaustedError) while running InceptionV3, VGG16, VGG19 on g2.4(1 GPU, 4 GB memory) instance on Amazon Web Server, I upgrade the instance to 8 GB memory (g3.4). Training VGG models take very long time (almost an hour four few epochs); therefore, I used MobileNet which was faster to train epically when I freeze the pretrain layers.
 
 The final model I use is MobileNet, therefore run `python driver.py MobileNet.h5`
 
 I removed the fully connected layers from MobileNet, and I added new three fully connected layers. Also,
 the model includes RELU layers to introduce nonlinearity (network_models/MobileNet.py #8), and the data is normalized in the model using a Keras lambda layer (network_models/MobileNet.py #16 & #17). 
 
-#### 2. Attempts to reduce overfitting in the model
+#### 2. Attempts to reduce overfitting in the model (Done)
 
-The model contains dropout layers in order to reduce overfitting (network_models/MobileNet.py #18) 
-
-#####
-Also, I used regularizers by penalizing the wieght on some of the fully connected layers, because the steering angle does not only depned on images, speed has an effect by how much the steering should shift.
-#####
+The model contains dropout layers in order to reduce overfitting (network_models/MobileNet.py #18)     
+Also, I used regularization by penalizing the weight on the first fully connected layer, because the steering angle does not only depend on images, speed has an effect by how much the steering should shift.
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (model.py #62). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-#### 3. Model parameter tuning
+#### 3. Model parameter tuning (Done)
 
 The model used an adam optimizer, so the learning rate was not tuned manually (model.py # 25).
 
-#### 4. Appropriate training data
+#### 4. Appropriate training data (Done)
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road and also I filpped the images (by using cv2.flip) and negate the steering angle
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road and also I flipped the images (by using cv2.flip) and negate the steering angle
 
 For details about how I created the training data, see the next section. 
 
 ### Model Architecture and Training Strategy
 
-#### 1. Solution Design Approach
+#### 1. Solution Design Approach (Done)
 
 
-In deed, first I used NVIDIA model in order to find other issue with traing rather than the model itself. For example, I have trained images with differnt region of interset, number of samples, number of epochs, and with left and right images. after I found the best combiantion that give a better ruesult, I start train MobileNet with these combiantion.
+In deed, first I used NVIDIA model in order to find other issue with training rather than the model itself. 
+For example, I have trained images with following:
+region of interest: (helpers/load_data.py #27)
 
-Frist, I disable freezing the pretrain layter, Then I freeze pretrain layter and only train the fully connect layer 
+My first try: 
+![first one ][region_of_interest1] 
 
+Another one
+![other one ][region_of_interest2] 
 
-The overall strategy for deriving a model architecture was to ...
+The final one
+![the final one][region_of_interest]
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+number of samples: 10k-100k (10K was chosen)
+number of epochs: 10-50 (50 was chosen)
+left and right images: (I used left and right images in the end)
+Using gray images: I found it has no big difference whether I trained with gray image or RGB images.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+After selected the best combination I trained MobileNet model with freezing the pre-train layer because it learn fast and the model works (network_model/MobileNet.py #13)
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (network_model/MobileNet.py) consisted of a convolution neural network with the following layers and layer sizes ...
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
@@ -155,3 +152,6 @@ I used this training data for training the model. The validation set helped dete
 3. [Keras Cheat Sheet: Neural Networks in Python](https://www.datacamp.com/community/blog/keras-cheat-sheet)             
 4. [keras augmentation example ](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)     
 5. [37 Reasons why your Neural Network is not working](https://blog.slavv.com/37-reasons-why-your-neural-network-is-not-working-4020854bd607)        
+
+
+python model.py --model MobileNet  --img_use 3 --tb 0 --tf_debug 2 --bs 8 --ep 70 --noplw  --folders_include ct1 --flip_img --notb_graph

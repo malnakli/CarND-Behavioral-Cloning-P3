@@ -2,6 +2,8 @@ from keras.applications.mobilenet import MobileNet
 from keras.models import Sequential, Model
 from keras.layers import Flatten, Dense, Lambda, Input
 from keras.layers.core import Dropout
+from keras import regularizers
+
 
 def model(weights=True,freez_pertrian_layers=True):
     inputs = Input(shape=(224, 224, 3), name='mobilenet_input')
@@ -13,9 +15,9 @@ def model(weights=True,freez_pertrian_layers=True):
         layer.trainable = not freez_pertrian_layers # trainable has to be false in order to freez the layers
 
     op = Flatten(input_shape=app_model.output_shape[1:])(app_model.output)
-    op = Dense(128, activation='relu')(op)
+    op = Dense(128, kernel_regularizer=regularizers.l2(0.01), activation='relu')(op)
     op = Dense(64, activation='relu')(op)
-    op = Dropout(.5)(op)
+    op = Dropout(.25)(op)
     outputs =  Dense(1)(op)
 
     model =  Model(inputs=inputs, outputs=outputs)
