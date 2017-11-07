@@ -69,11 +69,11 @@ Nevertheless, because of memory allocation error (ResourceExhaustedError) while 
 The final model I use is MobileNet, therefore run `python driver.py MobileNet.h5`
 
 I removed the fully connected layers from MobileNet, and I added new three fully connected layers. Also,
-the model includes RELU layers to introduce nonlinearity (network_models/MobileNet.py #8), and the data is normalized in the model using a Keras lambda layer (network_models/MobileNet.py #16 & #17). 
+the model includes RELU layers to introduce nonlinearity (network_models/MobileNet.py #28), and the data is normalized in the model using a Keras lambda layer (network_models/MobileNet.py #10). 
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model contains dropout layer in order to reduce overfitting (network_models/MobileNet.py #20)     
+The model contains dropout layer in order to reduce overfitting (network_models/MobileNet.py #30)     
 Also, I used regularization by penalizing the weight on the first fully connected layer, because the steering angle does not only depend on images, speed has an effect by how much the steering should shift.
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (model.py #62). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
@@ -111,7 +111,7 @@ number of epochs: 10-70 (50 was chosen)
 left and right images: (I used left and right images in the end)         
 Using gray images: I found it has no big difference whether I trained with gray image or RGB images.    
 
-After selected the best combination I trained MobileNet model with freezing the pre-train layer because it learn fast and the model works (network_model/MobileNet.py #13)
+After selected the best combination I trained MobileNet model with freezing the pre-train layer because it learn fast and the model works (network_model/MobileNet.py #25)
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
@@ -167,7 +167,7 @@ Also, I used an adam optimizer so that manually training the learning rate wasn'
 # My References 
 > These references has nothing to do with the project.  
 
-1.[Hyperparameters to look out for in Neural Networks](https://www.analyticsvidhya.com/blog/2016/10/tutorial-optimizing-neural-networks-using-keras-with-image-recognition-case-study/#six)            
+1. [Hyperparameters to look out for in Neural Networks](https://www.analyticsvidhya.com/blog/2016/10/tutorial-optimizing-neural-networks-using-keras-with-image-recognition-case-study/#six)            
 2. [Why You Need to Start Using Embedding Layers](https://medium.com/towards-data-science/deep-learning-4-embedding-layers-f9a02d55ac12)          
 3. [Keras Cheat Sheet: Neural Networks in Python](https://www.datacamp.com/community/blog/keras-cheat-sheet)             
 4. [keras augmentation example ](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)     
