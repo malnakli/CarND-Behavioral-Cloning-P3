@@ -3,6 +3,4 @@ data/**
 .vscode
 *.pyc
 tb_logs
-*.h5
-!model.h5
-run1
+run*

@@ -94,14 +94,15 @@ def load_data(samples,FLAGS):
             
             steering = float(row['steering'])
             image , image_flipped =  preprocess_image(row[header],model=FLAGS.model,flip_img=FLAGS.flip_img,gray=False)
+            
             if FLAGS.flip_img:
                 images.append(image_flipped)
                 steerings.append(-(steering + correction))
-
+            
             images.append(image)
             steerings.append(steering + correction)
+    
     # convert to numpy array since this what keras required
-
     return shuffle(np.array(images), np.array(steerings))
 
 
@@ -109,7 +110,9 @@ def load_data(samples,FLAGS):
 def load_data_generator(samples,FLAGS, batch_size=32):
     num_samples = samples.shape[0]
     while 1:  # Loop forever so the generator never terminates
-        # The reason this should work is that over many epochs,
+
+        ###
+        #  The reason shuffle is used, is that over many epochs,
         # random selection should ensure that all of your training data is taken into account.
         shuffle(samples)
         for offset in range(0, num_samples, batch_size):

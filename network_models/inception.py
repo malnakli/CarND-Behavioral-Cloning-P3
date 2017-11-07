@@ -4,7 +4,7 @@ from keras.layers import Flatten, Dense, Lambda, Input
 from keras.layers.core import Dropout
 
 
-# Still have an issue run this on GPU with 4GB memroy
+# Still have an issue run this on GPU with 4GB memory
 def model(weights=False):
     inputs = Input(shape=(224, 224, 3), name='InceptionV3_input')
     op = Lambda(lambda x: (x / 255.0) - 0.5)(inputs)
